@@ -1,0 +1,11 @@
+modelscope
+addict
+sortedcontainers
+simplejson
+numpy
+scipy
+soundfile
+pyloudnorm
+PyAudio>=0.2.14
+onnxruntime 
+pydantic
