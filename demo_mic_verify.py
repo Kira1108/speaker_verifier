@@ -324,7 +324,7 @@ async def run_demo(args: argparse.Namespace, pyaudio_module) -> None:
                         )
                     elif isinstance(event, UtteranceSkipped):
                         print(
-                            f"跳过过短话段: {event.duration:.2f}s "
+                            f"跳过过短话段-做不可打断处理: {event.duration:.2f}s "
                             f"< {args.min_verify_seconds:.2f}s"
                         )
                     elif isinstance(event, VerificationReady):
