@@ -140,7 +140,7 @@ def format_verification_result(
     score = float(result["score"])
     model_decision = str(result.get("text", "")).lower()
     is_same = model_decision == "yes" if model_decision else score >= threshold
-    decision = "同一说话人" if is_same else "非注册说话人"
+    decision = "✅ 同一说话人" if is_same else "❌ 非注册说话人"
     return (
         f"验证结果: {decision} | 时长={duration:.2f}s "
         f"| score={score:.5f} | threshold={threshold:.3f}"
@@ -324,7 +324,7 @@ async def run_demo(args: argparse.Namespace, pyaudio_module) -> None:
                         )
                     elif isinstance(event, UtteranceSkipped):
                         print(
-                            f"跳过过短话段-做不可打断处理: {event.duration:.2f}s "
+                            f"😴跳过过短话段-做不可打断处理: {event.duration:.2f}s "
                             f"< {args.min_verify_seconds:.2f}s"
                         )
                     elif isinstance(event, VerificationReady):
@@ -333,7 +333,7 @@ async def run_demo(args: argparse.Namespace, pyaudio_module) -> None:
                         try:
                             verification_queue.put_nowait(event.audio)
                             duration = len(event.audio) / (SAMPLE_RATE * SAMPLE_WIDTH)
-                            print(f"检测到尾点，提交 {duration:.2f}s 话段进行验证...")
+                            # print(f"检测到尾点，提交 {duration:.2f}s 话段进行验证...")
                         except asyncio.QueueFull:
                             print("验证队列已满，本话段已丢弃。请等待 CAM++ 推理完成。")
     finally:
