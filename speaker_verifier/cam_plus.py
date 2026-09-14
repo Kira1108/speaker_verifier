@@ -26,9 +26,9 @@ class SpeakerVerifier:
 
         # 只加载一次模型，后续调用复用
         self._pipeline = pipeline(
-            task="speaker-verification",
-            model="iic/speech_campplus_sv_zh-cn_16k-common",
-            model_revision="v1.0.0",
+            task='speaker-verification',
+            model='iic/speech_campplus_sv_zh-cn_16k-common',
+            model_revision='v1.0.0'
         )
 
     @classmethod
