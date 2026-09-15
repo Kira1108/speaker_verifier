@@ -61,7 +61,7 @@ class VoiceSegmentCollector:
         self._enrollment_audio = bytearray()
         self._reference_audio: bytes | None = None
         self._current_utterance = bytearray()
-
+    
     @property
     def is_enrolled(self) -> bool:
         return self._reference_audio is not None
