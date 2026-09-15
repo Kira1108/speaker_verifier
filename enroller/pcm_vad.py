@@ -5,18 +5,17 @@ Model: snakers4/silero-vad, src/silero_vad/data/silero_vad.onnx.
 Implements hysteresis segmentation without a maximum segment duration.
 """
 import json
-from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import onnxruntime as ort
+from pydantic import BaseModel
 
 
 DEFAULT_MODEL_PATH = Path(__file__).parent.parent / "vad" / "models" / "silero_vad.onnx"
 
 
-@dataclass
-class EnrollResult:
+class EnrollResult(BaseModel):
     """音频准备结果，不代表声纹提取、保存或音频质量检查成功。
 
     duration: 保留 PCM 的时长（秒），包含边界保护和片段内的短暂停顿。
