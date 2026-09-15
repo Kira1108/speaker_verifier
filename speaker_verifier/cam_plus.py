@@ -6,6 +6,7 @@ from typing import Optional
 import numpy as np
 from scipy.signal import resample_poly
 from modelscope.pipelines import pipeline
+from .onnx_pipeline import CampPlusONNX
 
 
 class SpeakerVerifier:
@@ -25,11 +26,13 @@ class SpeakerVerifier:
         self._lock = Lock()
 
         # 只加载一次模型，后续调用复用
-        self._pipeline = pipeline(
-            task='speaker-verification',
-            model='iic/speech_campplus_sv_zh-cn_16k-common',
-            model_revision='v1.0.0'
-        )
+        # self._pipeline = pipeline(
+        #     task='speaker-verification',
+        #     model='iic/speech_campplus_sv_zh-cn_16k-common',
+        #     model_revision='v1.0.0'
+        # )
+        
+        self._pipeline = CampPlusONNX()
 
     @classmethod
     async def create(cls, threshold: float = 0.31):
