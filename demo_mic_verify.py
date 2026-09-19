@@ -1,7 +1,9 @@
 import argparse
 import asyncio
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable
+from uuid import uuid4
 
 from vad.analyzer import VADState
 
@@ -12,6 +14,7 @@ SAMPLE_WIDTH = 2
 VAD_FRAMES = 512
 VAD_CHUNK_BYTES = VAD_FRAMES * CHANNELS * SAMPLE_WIDTH
 VERIFY_QUEUE_SIZE = 4
+ENROLLED_AUDIO_DIR = Path(__file__).resolve().parent / "enrolled_audios"
 
 
 @dataclass(frozen=True)
@@ -132,6 +135,15 @@ class VoiceSegmentCollector:
         if len(audio) < self.min_verify_bytes:
             return UtteranceSkipped(duration)
         return VerificationReady(audio)
+
+
+def save_enrollment_audio(reference_audio: bytes) -> Path:
+    """将注册音频原样保存为 UUID 命名的裸 PCM 文件，不添加 WAV 头。"""
+    ENROLLED_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+    path = ENROLLED_AUDIO_DIR / f"{uuid4()}.pcm"
+    with path.open("xb") as audio_file:
+        audio_file.write(reference_audio)
+    return path
 
 
 def format_verification_result(
@@ -309,6 +321,10 @@ async def run_demo(args: argparse.Namespace, pyaudio_module) -> None:
 
                 for event in events:
                     if isinstance(event, EnrollmentCompleted):
+                        audio_path = await asyncio.to_thread(
+                            save_enrollment_audio, event.reference_audio
+                        )
+                        print(f"注册音频已保存: {audio_path}")
                         print(
                             f"注册完成: 已记录 {args.enrollment_seconds:.1f}s 有效语音。"
                             "后续话段将在 VAD 尾点进行验证。"

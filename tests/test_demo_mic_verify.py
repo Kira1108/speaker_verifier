@@ -1,5 +1,9 @@
 import asyncio
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
+from uuid import UUID
 
 from demo_mic_verify import (
     EnrollmentCompleted,
@@ -7,6 +11,7 @@ from demo_mic_verify import (
     UtteranceSkipped,
     VerificationReady,
     VoiceSegmentCollector,
+    save_enrollment_audio,
     verification_worker,
 )
 from vad.analyzer import VADAnalyzer, VADState
@@ -121,6 +126,30 @@ class VoiceSegmentCollectorTests(unittest.TestCase):
         self.assertEqual(len(events), 1)
         self.assertIsInstance(events[0], UtteranceSkipped)
         self.assertAlmostEqual(events[0].duration, CHUNK_SAMPLES / SAMPLE_RATE)
+
+
+class EnrollmentAudioSaveTests(unittest.TestCase):
+    def test_saves_exact_pcm_bytes_with_uuid_filename(self):
+        with TemporaryDirectory() as directory:
+            output_dir = Path(directory) / "enrolled_audios"
+            pcm = pcm_chunk(-32768) + pcm_chunk(32767)
+            with patch("demo_mic_verify.ENROLLED_AUDIO_DIR", output_dir):
+                path = save_enrollment_audio(pcm)
+
+            self.assertEqual(path.parent, output_dir)
+            self.assertEqual(path.suffix, ".pcm")
+            self.assertEqual(UUID(path.stem).version, 4)
+            self.assertEqual(path.read_bytes(), pcm)
+
+    def test_each_save_creates_a_new_file(self):
+        with TemporaryDirectory() as directory:
+            with patch("demo_mic_verify.ENROLLED_AUDIO_DIR", Path(directory)):
+                first = save_enrollment_audio(pcm_chunk(1))
+                second = save_enrollment_audio(pcm_chunk(2))
+
+            self.assertNotEqual(first, second)
+            self.assertEqual(first.read_bytes(), pcm_chunk(1))
+            self.assertEqual(second.read_bytes(), pcm_chunk(2))
 
 
 class FakeVerifier:
